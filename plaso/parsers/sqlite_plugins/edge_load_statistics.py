@@ -7,10 +7,9 @@ SQLite database Name: load_statistics.db
 
 from __future__ import unicode_literals
 
-from dfdatetime import posix_time as dfdatetime_posix_time
+from dfdatetime import webkit_time as dfdatetime_webkit_time
 
-from plaso.containers import time_events
-from plaso.lib import eventdata
+from plaso.containers import events
 from plaso.parsers import sqlite
 from plaso.parsers.sqlite_plugins import interface
 
@@ -19,15 +18,14 @@ class EdgeLoadStatisticsResourceEventData(events.EventData):
   """edge load statistics resource event data.
 
   Attributes:
-    top_level_hostname: <ADD DESCRIPTION HERE>
-    resource_hostname: <ADD DESCRIPTION HERE>
-    resource_url_hash: <ADD DESCRIPTION HERE>
-    resource_type: <ADD DESCRIPTION HERE>
-    last_update: <ADD DESCRIPTION HERE>
+    top_level_hostname: Source domain that initiated resource load
+    resource_hostname: External domain of the resource that was loaded
+    resource_type: Integer descriptor of resource type
+    last_update: Last update time of resource, cached or not.
 
   """
 
-  DATA_TYPE = 'edge:load:statistics:resource'
+  DATA_TYPE = 'edge:resources:load_statistics'
 
   def __init__(self):
     """Initializes event data."""
@@ -36,8 +34,8 @@ class EdgeLoadStatisticsResourceEventData(events.EventData):
     self.last_update = None
     self.resource_hostname = None
     self.resource_type = None
-    self.resource_url_hash = None
     self.top_level_hostname = None
+    self.query = None
 
 
 class EdgeLoadStatisticsPlugin(interface.SQLitePlugin):
@@ -48,7 +46,7 @@ class EdgeLoadStatisticsPlugin(interface.SQLitePlugin):
 
   QUERIES = [((
       'SELECT'
-      'top_level_hostname,resource_hostname,resource_url_hash,resource_type,last_update'
+      'top_level_hostname,resource_hostname,resource_type,last_update'
       'from load_statistics'), 'ParseResourceRow')]
 
   REQUIRED_TABLES = frozenset(['load_statistics'])
@@ -69,6 +67,24 @@ class EdgeLoadStatisticsPlugin(interface.SQLitePlugin):
           'nation_hostname,is_top_level_document))')
   }]
 
+  def _GetWebKitDateTimeRowValue(self, query_hash, row, value_name):
+    """Retrieves a WebKit date and time value from the row.
+
+    Args:
+      query_hash (int): hash of the query, that uniquely identifies the query
+          that produced the row.
+      row (sqlite3.Row): row.
+      value_name (str): name of the value.
+
+    Returns:
+      dfdatetime.WebKitTime: date and time value or None if not available.
+    """
+    timestamp = self._GetRowValue(query_hash, row, value_name)
+    if timestamp is None:
+      return None
+
+    return dfdatetime_webkit_time.WebKitTime(timestamp=timestamp)
+
   def ParseResourceRow(self, parser_mediator, query, row, **unused_kwargs):
     """Parses a row from the database.
 
@@ -80,13 +96,17 @@ class EdgeLoadStatisticsPlugin(interface.SQLitePlugin):
     """
     # Note that pysqlite does not accept a Unicode string in row['string'] and
     # will raise "IndexError: Index must be int or string".
+    query_hash = hash(query)
 
     event_data = EdgeLoadStatisticsResourceEventData()
-    event_data.last_update = row['last_update']
+    event_data.last_update = self._GetWebKitDateTimeRowValue(
+        query_hash, row, 'last_update')
     event_data.resource_hostname = row['resource_hostname']
     event_data.resource_type = row['resource_type']
-    event_data.resource_url_hash = row['resource_url_hash']
     event_data.top_level_hostname = row['top_level_hostname']
+    event_data.query = query
+
+    parser_mediator.ProduceEventData(event_data)
 
 
 sqlite.SQLiteParser.RegisterPlugin(EdgeLoadStatisticsPlugin)

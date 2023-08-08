@@ -3,7 +3,6 @@
 
 from plaso.formatters import chrome
 from plaso.formatters import chrome_preferences
-from plaso.formatters import edge_load_statistics
 from plaso.formatters import file_system
 from plaso.formatters import firefox
 from plaso.formatters import msiecf
