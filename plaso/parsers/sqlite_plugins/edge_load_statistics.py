@@ -47,9 +47,13 @@ class EdgeLoadStatisticsPlugin(interface.SQLitePlugin):
   QUERIES = [((
       'SELECT'
       'top_level_hostname,resource_hostname,resource_type,last_update'
-      'from load_statistics'), 'ParseResourceRow')]
+      'FROM load_statistics'), 'ParseResourceRow')]
 
-  REQUIRED_TABLES = frozenset(['load_statistics'])
+  REQUIRED_TABLES = {
+          'load_statistics': frozenset([
+          'top_level_hostname', 'resource_hostname', 'resource_url_hash', 
+          'resource_type', 'last_update']),
+  }
 
   SCHEMAS = [{
       'load_statistics': (
