@@ -51,8 +51,11 @@ class EdgeLoadStatisticsPlugin(interface.SQLitePlugin):
 
   REQUIRED_TABLES = {
           'load_statistics': frozenset([
-          'top_level_hostname', 'resource_hostname', 'resource_url_hash', 
-          'resource_type', 'last_update']),
+            'top_level_hostname', 'resource_hostname', 'resource_url_hash', 
+            'resource_type', 'last_update']),
+          'meta':frozenset(['key','value']),
+          'redirect_statistics':frozenset(['source_hostname',
+            'destination_hostname','is_top_level_document','last_update'])
   }
 
   SCHEMAS = [{
