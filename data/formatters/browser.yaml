@@ -322,8 +322,10 @@ enumeration_helpers:
     11: 'Video'
     12: 'Manifest'
     13: 'SpeculationRules'
-message:
-- '{top_level_hostname} loaded External Resource from: {resource_hostname} with type of {resource_type_loaded}'
+message: 
+- '{top_level_hostname}' 
+- 'loaded External Resource from: {resource_hostname}'
+- ' with type of {resource_type_loaded}'
 short_message:
 - 'External Resource loaded from: {resource_hostname}'
 short_source: 'WEBHIST'

@@ -31,7 +31,7 @@ class EdgeLoadStatisticsTest(test_lib.SQLitePluginTestCase):
     'resource_type': 4,
     'top_level_hostname': 'ntp.msn.com'
     }
-    event_data = storage_writer.GetAttributeContainerByIndex('event_data', 1)
+    event_data = storage_writer.GetAttributeContainerByIndex('event_data', 0)
     self.CheckEventData(event_data, expected_event_values)
 
 if __name__ == '__main__':
