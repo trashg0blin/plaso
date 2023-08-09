@@ -45,8 +45,8 @@ class EdgeLoadStatisticsPlugin(interface.SQLitePlugin):
   DESCRIPTION = 'Parser for EdgeLoadStatistics'
 
   QUERIES = [((
-      'SELECT'
-      'top_level_hostname,resource_hostname,resource_type,last_update'
+      'SELECT top_level_hostname'
+      'resource_hostname,resource_type,last_update'
       'FROM load_statistics'), 'ParseResourceRow')]
 
   REQUIRED_STRUCTURE = {
