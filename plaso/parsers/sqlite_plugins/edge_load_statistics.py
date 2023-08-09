@@ -49,14 +49,15 @@ class EdgeLoadStatisticsPlugin(interface.SQLitePlugin):
       'top_level_hostname,resource_hostname,resource_type,last_update'
       'FROM load_statistics'), 'ParseResourceRow')]
 
-  REQUIRED_TABLES = {
+  REQUIRED_STRUCTURE = {
           'load_statistics': frozenset([
             'top_level_hostname', 'resource_hostname', 'resource_url_hash', 
             'resource_type', 'last_update']),
-          'meta':frozenset(['key','value']),
-          'redirect_statistics':frozenset(['source_hostname',
-            'destination_hostname','is_top_level_document','last_update'])
-  }
+          'meta':frozenset([
+            'key','value']),
+          'redirect_statistics':frozenset([
+            'source_hostname','destination_hostname',
+            'is_top_level_document','last_update'])}
 
   SCHEMAS = [{
       'load_statistics': (
@@ -71,8 +72,7 @@ class EdgeLoadStatisticsPlugin(interface.SQLitePlugin):
           'CREATE TABLE redirect_statistics(source_hostname TEXT,'
           'destination_hostname TEXT, is_top_level_document INTEGER NOT'
           'NULL, last_update INTEGER NOT NULL, UNIQUE(source_hostname,desti'
-          'nation_hostname,is_top_level_document))')
-  }]
+          'nation_hostname,is_top_level_document))')}]
 
   def _GetWebKitDateTimeRowValue(self, query_hash, row, value_name):
     """Retrieves a WebKit date and time value from the row.
@@ -108,12 +108,14 @@ class EdgeLoadStatisticsPlugin(interface.SQLitePlugin):
     event_data = EdgeLoadStatisticsResourceEventData()
     event_data.last_update = self._GetWebKitDateTimeRowValue(
         query_hash, row, 'last_update')
-    event_data.resource_hostname = row['resource_hostname']
-    event_data.resource_type = row['resource_type']
-    event_data.top_level_hostname = row['top_level_hostname']
+    event_data.resource_hostname = self._GetRowValue(
+      query_hash, row, 'resource_hostname')
+    event_data.resource_type = self._GetRowValue(
+      query_hash, row, 'resource_type')
+    event_data.top_level_hostname = self._GetRowValue(
+      query_hash, row, 'top_level_hostname')
     event_data.query = query
 
     parser_mediator.ProduceEventData(event_data)
-
 
 sqlite.SQLiteParser.RegisterPlugin(EdgeLoadStatisticsPlugin)
