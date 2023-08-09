@@ -5,8 +5,6 @@ SQLite database path: test_data/load_statistics.db
 SQLite database Name: load_statistics.db
 """
 
-from __future__ import unicode_literals
-
 from dfdatetime import webkit_time as dfdatetime_webkit_time
 
 from plaso.containers import events
